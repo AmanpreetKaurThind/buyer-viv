@@ -8,10 +8,15 @@ const PORT = process.env.PORT || 3000;
 app.use((req, res, next) => {
     const allowedOrigins = ['https://bypassunlock.com'];
     const apiKey = req.query.api_key;
-    
+    const origin = req.headers.origin;
+
     // Check if request is coming from allowed origin or if API key is provided
-    if (allowedOrigins.includes(req.headers.origin) || apiKey === 'Zx9Lm3Qp7Rt2Sv8W') {
-        res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+    if ((allowedOrigins.includes(origin) || apiKey === 'Zx9Lm3Qp7Rt2Sv8W') && (origin || apiKey)) {
+        if (origin) {
+            res.setHeader('Access-Control-Allow-Origin', origin);
+        } else {
+            res.setHeader('Access-Control-Allow-Origin', '*'); // Set a default origin if none is provided
+        }
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
         next();
