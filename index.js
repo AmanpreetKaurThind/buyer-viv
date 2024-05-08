@@ -42,7 +42,7 @@ app.get('/api/bypass', async (req, res) => {
             return res.status(400).json({ error: 'Link parameter is required' });
         }
 
-        const response = await axios.get(`http://45.140.188.129:6534api/adlinks/bypass?url=${link}`);
+        const response = await axios.get(`http://45.140.188.129:6534/api/adlinks/bypass?url=${link}`);
         res.json(response.data);
     } catch (error) {
         console.error('Error:', error.response ? error.response.data : error.message);
