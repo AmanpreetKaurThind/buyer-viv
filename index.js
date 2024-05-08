@@ -6,23 +6,10 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware to restrict access based on origin and API key
 app.use((req, res, next) => {
-    const allowedOrigins = ['https://bypassunlock.com'];
-    const apiKey = req.query.api_key;
-    const origin = req.headers.origin;
-
-    // Check if request is coming from allowed origin or if API key is provided
-    if ((allowedOrigins.includes(origin) || apiKey === 'Zx9Lm3Qp7Rt2Sv8W') && (origin || apiKey)) {
-        if (origin) {
-            res.setHeader('Access-Control-Allow-Origin', origin);
-        } else {
-            res.setHeader('Access-Control-Allow-Origin', '*'); // Set a default origin if none is provided
-        }
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-        next();
-    } else {
-        res.status(403).json({ error: 'Forbidden' });
-    }
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    next();
 });
 
 // Middleware to parse JSON bodies
@@ -40,7 +27,19 @@ app.get('/api/supported', async (req, res) => {
 });
 
 // Route to handle /api/bypass?link=LINK
-app.get('/api/bypass', async (req, res) => {
+const validateRequest = (req, res, next) => {
+    const origin = req.get('origin');
+    const apiKey = req.query.api_key;
+    
+    // Check if request originates from bypassunlock.com or contains the api_key parameter
+    if (origin === 'https://bypassunlock.com' || apiKey === 'Zx9Lm3Qp7Rt2Sv8W') {
+        return next();
+    } else {
+        return res.status(403).json({ error: 'Unauthorized' });
+    }
+};
+
+app.get('/api/bypass', validateRequest, async (req, res) => {
     try {
         const link = req.query.link;
         if (!link) {
@@ -54,7 +53,6 @@ app.get('/api/bypass', async (req, res) => {
         res.status(error.response ? error.response.status : 500).json({ error: 'Internal Server Error' });
     }
 });
-
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
